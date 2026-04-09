@@ -81,9 +81,15 @@ app.post('/api/auth/login', async (req, res) => {
     const user = await User.findOne({ email: normalizedEmail });
     
     if (user && (await user.matchPassword(password))) {
-      res.json({ _id: user._id, name: user.name, email: user.email, role: user.role, token: generateToken(user._id) });
+      res.json({ 
+        _id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role, 
+        token: generateToken(user._id) 
+      });
     } else {
-      res.status(401).json({ message: 'Invalid email or password. Please check your spelling or sign up first.' });
+      res.status(401).json({ message: 'THE CREDENTIALS ARE WRONG' });
     }
   } catch (err) {
     console.error('Login Error:', err);
