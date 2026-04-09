@@ -39,7 +39,6 @@ const App = () => {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-                <index element={<AnalyticsHub />} />
                 <Route index element={<AnalyticsHub />} />
                 <Route path="weather" element={<Weather />} />
                 <Route path="aqi" element={<AQI />} />
