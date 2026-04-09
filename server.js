@@ -14,7 +14,7 @@ const io = new Server(server, {
 });
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
 mongoose.connect('mongodb+srv://koushikk0745_db_user:koushik_2006@cluster0.y6hy32y.mongodb.net/?appName=Cluster0')
   .then(() => console.log('MongoDB Connected to Root Server'))
@@ -151,7 +151,7 @@ app.get('/api/weather/latest', (req, res) => res.json({ temp: 24, humidity: 65, 
 
 // Serve SPA
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
 });
 
 // WebSocket
