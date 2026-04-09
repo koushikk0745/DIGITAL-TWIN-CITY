@@ -2,6 +2,10 @@ const express = require('express');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('./backend/models/User');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,31 +16,41 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'dist')));
 
-let users = [];
-let feedbacks = [];
-let complaints = [
-  { id: '1', category: 'Infrastructure', title: 'Pothole on Main Street', description: 'Large pothole causing traffic issues', location: 'Main St', status: 'In Progress', priority: 'High', date: '2 hours ago' },
-  { id: '2', category: 'Sanitation', title: 'Missed garbage collection', description: 'Garbage not collected for 3 days', location: 'Sector 5', status: 'Pending', priority: 'Medium', date: '5 hours ago' },
-  { id: '3', category: 'Noise', title: 'Construction noise violation', description: 'Construction after hours', location: 'Downtown', status: 'Resolved', priority: 'Low', date: '1 day ago' },
-  { id: '4', category: 'Traffic', title: 'Broken traffic signal', description: 'Signal not working', location: '5th Ave', status: 'In Progress', priority: 'High', date: '1 day ago' }
-];
-let emergencies = [
-  { id: '1', type: 'Fire', severity: 'High', location: 'Sector 4, Industrial Area', time: '10 min ago', status: 'Dispatched', units: 3 },
-  { id: '2', type: 'Medical', severity: 'Medium', location: 'Main St. & 5th Ave', time: '25 min ago', status: 'On Scene', units: 1 }
-];
+mongoose.connect('mongodb+srv://koushikk0745_db_user:koushik_2006@cluster0.y6hy32y.mongodb.net/?appName=Cluster0')
+  .then(() => console.log('MongoDB Connected to Root Server'))
+  .catch(err => console.log('MongoDB Root Connection Error:', err));
 
-const generateToken = (id) => 'mocktoken_' + id;
+const generateToken = (id) => {
+  return jwt.sign({ id }, 'supersecretjwtkeyforsmartcity', { expiresIn: '30d' });
+};
 
 // Auth Routes
-app.post('/api/auth/register', (req, res) => {
-  const { name, email, password } = req.body;
-  const user = { _id: Date.now().toString(), name, email, role: 'user' };
-  users.push(user);
-  res.json({ _id: user._id, name: user.name, email: user.email, role: user.role, token: generateToken(user._id) });
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const userExists = await User.findOne({ email });
+    if (userExists) return res.status(400).json({ message: 'User already exists' });
+
+    const user = await User.create({ name, email, password });
+    res.status(201).json({ _id: user._id, name: user.name, email: user.email, token: generateToken(user._id) });
+  } catch (err) {
+    res.status(500).json({ message: 'Error creating user' });
+  }
 });
 
-app.post('/api/auth/login', (req, res) => {
-  res.json({ _id: '1', name: 'Demo Admin', email: 'admin@city.com', role: 'admin', token: generateToken('1') });
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (user && (await user.matchPassword(password))) {
+      res.json({ _id: user._id, name: user.name, email: user.email, role: user.role, token: generateToken(user._id) });
+    } else {
+      res.status(401).json({ message: 'Invalid email or password. Please sign up first.' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 // Feedback Routes
