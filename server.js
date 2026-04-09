@@ -38,23 +38,23 @@ const generateToken = (id) => {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    const userExists = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase();
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name, email: normalizedEmail, password });
 
-    // Send Welcome Email
     const mailOptions = {
       from: 'TWINCITY Operations',
-      to: email,
-      subject: 'Citizen ID Intialized - Welcome to TwinCity',
+      to: normalizedEmail,
+      subject: 'Citizen ID Initialized - Welcome to TwinCity',
       html: `
         <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
           <h2 style="color: #2563eb;">Welcome to TwinCity, ${name}!</h2>
           <p>Your Citizen ID has been successfully initialized. You can now access the operations dashboard.</p>
           <hr />
           <p><strong>Your Credentials:</strong></p>
-          <p>Email: ${email}</p>
+          <p>Email: ${normalizedEmail}</p>
           <p>Status: Active</p>
           <hr />
           <p style="font-size: 12px; color: #666;">Please use these credentials to log in at <a href="https://digital-twin-city.vercel.app/login">TwinCity Portal</a>.</p>
@@ -64,7 +64,6 @@ app.post('/api/auth/register', async (req, res) => {
 
     transporter.sendMail(mailOptions).catch(err => console.log('Email Send Error:', err));
 
-    // Notice: We do NOT send a token here to force manual login
     res.status(201).json({ 
       success: true, 
       message: 'Citizen ID initialized. Please log in with your credentials.' 
@@ -78,15 +77,17 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
     
     if (user && (await user.matchPassword(password))) {
       res.json({ _id: user._id, name: user.name, email: user.email, role: user.role, token: generateToken(user._id) });
     } else {
-      res.status(401).json({ message: 'Invalid email or password. Please sign up first.' });
+      res.status(401).json({ message: 'Invalid email or password. Please check your spelling or sign up first.' });
     }
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Login Error:', err);
+    res.status(500).json({ message: 'Server error during login' });
   }
 });
 
