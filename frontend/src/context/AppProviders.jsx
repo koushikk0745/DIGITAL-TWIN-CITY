@@ -58,13 +58,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(data));
       setUser(data);
     } catch (err) {
-      console.log("Mocking login due to DB Error", err.message);
-      const name = email.split('@')[0];
-      const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-      const mockUser = { name: formattedName, email, role: 'user', token: 'mockToken' };
-      localStorage.setItem('token', mockUser.token);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      throw err; // Propagate error to login page UI
     }
   };
 
@@ -75,12 +69,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(data));
       setUser(data);
     } catch (err) {
-      console.log("Mocking register due to DB Error", err.message);
-      const mockName = name || email.split('@')[0];
-      const mockUser = { name: mockName, email, role: 'user', token: 'mockToken' };
-      localStorage.setItem('token', mockUser.token);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      throw err; // Propagate error to register page UI
     }
   };
 

@@ -2,31 +2,59 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 
-const users = [];
+const User = require('../models/User');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'secret', { expiresIn: '30d' });
 };
 
-router.post('/register', (req, res) => {
-  const { name, email, password } = req.body;
-  const existing = users.find(u => u.email === email);
-  if (existing) return res.status(400).json({ message: 'User already exists' });
+// @desc    Register user
+// @route   POST /api/auth/register
+router.post('/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const userExists = await User.findOne({ email });
 
-  const user = { _id: Date.now().toString(), name, email, password, role: 'user' };
-  users.push(user);
-  res.status(201).json({ _id: user._id, name: user.name, email: user.email, role: user.role, token: generateToken(user._id) });
+    if (userExists) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const user = await User.create({ name, email, password });
+
+    if (user) {
+      res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token: generateToken(user._id)
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error during registration' });
+  }
 });
 
-router.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  const user = users.find(u => u.email === email && u.password === password);
-  
-  if (user) {
-    res.json({ _id: user._id, name: user.name, email: user.email, role: user.role, token: generateToken(user._id) });
-  } else {
-    const mockUser = { _id: '1', name: 'Demo Admin', email: 'admin@city.com', role: 'admin', token: generateToken('1') };
-    res.json(mockUser);
+// @desc    Login user
+// @route   POST /api/auth/login
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user && (await user.matchPassword(password))) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token: generateToken(user._id)
+      });
+    } else {
+      res.status(401).json({ message: 'Invalid email or password' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error during login' });
   }
 });
 
