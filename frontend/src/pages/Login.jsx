@@ -12,17 +12,23 @@ const Login = () => {
   const { login, register } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [success, setSuccess] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     
     try {
       if (isLogin) {
         await login(email, password);
+        navigate('/');
       } else {
         await register(name, email, password);
+        setSuccess('Citizen ID Initialized! Check your email and log in to continue.');
+        setIsLogin(true); // Switch to login view
+        setName('');
       }
-      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed');
     }
@@ -43,6 +49,11 @@ const Login = () => {
 
         {/* Form Area */}
         <div className="bg-[#1e293b]/50 backdrop-blur-xl p-10 rounded-3xl border border-white/5 shadow-2xl space-y-6">
+          {success && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-xl text-sm animate-in fade-in slide-in-from-top-1">
+              {success}
+            </div>
+          )}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm animate-pulse">
               {error}

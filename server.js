@@ -20,6 +20,16 @@ mongoose.connect('mongodb+srv://koushikk0745_db_user:koushik_2006@cluster0.y6hy3
   .then(() => console.log('MongoDB Connected to Root Server'))
   .catch(err => console.error('MongoDB Root Connection Error:', err));
 
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER || 'digitaltwincity.dev@gmail.com', // Placeholder
+    pass: process.env.EMAIL_PASS || 'your_gmail_app_password' // Placeholder
+  }
+});
+
 const generateToken = (id) => {
   return jwt.sign({ id }, 'supersecretjwtkeyforsmartcity', { expiresIn: '30d' });
 };
@@ -32,9 +42,36 @@ app.post('/api/auth/register', async (req, res) => {
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
     const user = await User.create({ name, email, password });
-    res.status(201).json({ _id: user._id, name: user.name, email: user.email, token: generateToken(user._id) });
+
+    // Send Welcome Email
+    const mailOptions = {
+      from: 'TWINCITY Operations',
+      to: email,
+      subject: 'Citizen ID Intialized - Welcome to TwinCity',
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h2 style="color: #2563eb;">Welcome to TwinCity, ${name}!</h2>
+          <p>Your Citizen ID has been successfully initialized. You can now access the operations dashboard.</p>
+          <hr />
+          <p><strong>Your Credentials:</strong></p>
+          <p>Email: ${email}</p>
+          <p>Status: Active</p>
+          <hr />
+          <p style="font-size: 12px; color: #666;">Please use these credentials to log in at <a href="https://digital-twin-city.vercel.app/login">TwinCity Portal</a>.</p>
+        </div>
+      `
+    };
+
+    transporter.sendMail(mailOptions).catch(err => console.log('Email Send Error:', err));
+
+    // Notice: We do NOT send a token here to force manual login
+    res.status(201).json({ 
+      success: true, 
+      message: 'Citizen ID initialized. Please log in with your credentials.' 
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Error creating user' });
+    console.error('Registration Error:', err);
+    res.status(500).json({ message: 'Error creating user: ' + err.message });
   }
 });
 
