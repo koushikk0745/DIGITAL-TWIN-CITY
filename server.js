@@ -16,9 +16,9 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
-mongoose.connect('mongodb+srv://koushikk0745_db_user:koushik_2006@cluster0.y6hy32y.mongodb.net/?appName=Cluster0')
+mongoose.connect('mongodb+srv://koushikk0745_db_user:koushik_2006@cluster0.y6hy32y.mongodb.net/digitalTwin?appName=Cluster0')
   .then(() => console.log('MongoDB Connected to Root Server'))
-  .catch(err => console.log('MongoDB Root Connection Error:', err));
+  .catch(err => console.error('MongoDB Root Connection Error:', err));
 
 const generateToken = (id) => {
   return jwt.sign({ id }, 'supersecretjwtkeyforsmartcity', { expiresIn: '30d' });

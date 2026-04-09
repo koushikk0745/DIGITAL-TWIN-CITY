@@ -29,73 +29,81 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black relative overflow-hidden">
-      {/* Decorative bg elements */}
-      <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div className="glass-panel p-6 md:p-8 w-[92%] max-w-md relative z-10">
-        <div className="text-center mb-8">
-          <div className="relative mb-10 flex flex-col items-center">
-            <div className="w-20 h-1.5 bg-cyan-400 rounded-full mb-1"></div>
-            <div className="w-1.5 h-16 bg-blue-600 rounded-full"></div>
-            <div className="absolute -bottom-3 w-3 h-3 bg-cyan-400 rounded-full animate-ping"></div>
-          </div>
-          <h2 className="text-3xl font-bold text-white tracking-widest uppercase mb-1">TwinCity</h2>
-          <p className="text-slate-500 text-xs uppercase tracking-[0.2em]">{isLogin ? 'Operations Portal' : 'Citizen Registration'}</p>
+    <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center p-4 font-sans text-white">
+      <div className="w-full max-w-md space-y-8 animate-in fade-in duration-700">
+        {/* Branding Area */}
+        <div className="text-center space-y-2">
+          <h1 className="text-5xl font-black tracking-tighter text-white">
+            TWINCITY
+          </h1>
+          <p className="text-sm font-light tracking-[0.3em] text-slate-400 uppercase">
+            {isLogin ? 'Citizen Authentication' : 'Citizen Registration'}
+          </p>
         </div>
 
-        {error && <div className="p-3 mb-4 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 text-sm">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Full Name</label>
-              <input 
-                type="text" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                className="glass-input" 
-                placeholder="John Doe"
-                required={!isLogin} 
-              />
+        {/* Form Area */}
+        <div className="bg-[#1e293b]/50 backdrop-blur-xl p-10 rounded-3xl border border-white/5 shadow-2xl space-y-6">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm animate-pulse">
+              {error}
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Email Address</label>
-            <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              className="glass-input" 
-              placeholder="citizen@smartcity.gov"
-              required 
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              className="glass-input" 
-              placeholder="••••••••"
-              required 
-            />
-          </div>
-          
-          <button type="submit" className="btn-primary w-full mt-6 py-2.5">
-            {isLogin ? 'Authenticate' : 'Initialize ID'}
-          </button>
-        </form>
 
-        <div className="mt-6 text-center">
-          <button 
-            onClick={() => setIsLogin(!isLogin)} 
-            className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
-          >
-            {isLogin ? "Don't have an ID? Register here" : "Already have an ID? Log in"}
-          </button>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {!isLogin && (
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full bg-[#0f172a] border border-white/10 rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white placeholder-slate-600"
+                  placeholder="Enter full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Email Address</label>
+              <input
+                type="email"
+                required
+                className="w-full bg-[#0f172a] border border-white/10 rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white placeholder-slate-600"
+                placeholder="citizen@city.gov"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Password</label>
+              <input
+                type="password"
+                required
+                className="w-full bg-[#0f172a] border border-white/10 rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-white placeholder-slate-600"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] mt-4"
+            >
+              {isLogin ? 'Verify Identity' : 'Initialize ID'}
+            </button>
+          </form>
+
+          <div className="text-center pt-2">
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+            >
+              {isLogin ? "New here? Initialize your ID" : "Already have an ID? Log in"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
